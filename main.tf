@@ -11,17 +11,8 @@ provider "aws" {
   region = "eu-west-1"
 }
 
-#data "terraform_remote_state" "state" {
-  #backend = "s3"
-  #config = {
-    #bucket = "410830981177-vish-tfstate"
-    #region = "eu-west-1"
-    #key    = "vish.tfstate"
-  #}
-#}
-
 resource "aws_security_group" "allow_tls" {
-  name        = "allow"
+  name        = "vish-sg-1"
   description = "Allow some inbound traffic"
 
   ingress {
