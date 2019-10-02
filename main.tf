@@ -16,10 +16,10 @@ resource "aws_security_group" "allow_tls" {
   description = "Allow some inbound traffic"
 
   ingress {
-    from_port   = 111
-    to_port     = 111
+    from_port   = 222
+    to_port     = 222
     protocol    = "tcp"
-    cidr_blocks = ["1.1.1.1/32"]
+    cidr_blocks = ["2.2.2.2/32"]
   }
 
   tags = {
