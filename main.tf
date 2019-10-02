@@ -12,7 +12,7 @@ provider "aws" {
 }
 
 resource "aws_security_group" "allow_tls" {
-  name        = "vish-sg-1"
+  name        = "vish-sg-fail"
   description = "Allow some inbound traffic"
 
   ingress {
@@ -26,4 +26,3 @@ resource "aws_security_group" "allow_tls" {
     Name = "Vish Testing"
   }
 }
-
