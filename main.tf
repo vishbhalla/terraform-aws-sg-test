@@ -19,7 +19,7 @@ resource "aws_security_group" "allow_tls" {
     from_port   = 222
     to_port     = 222
     protocol    = "tcp"
-    cidr_blocks = ["2.2.2.2/32"]
+    cidr_blocks = ["2.2.2.3/32"]
   }
 
   tags = {
