@@ -1,8 +1,8 @@
 pipeline {
     agent any
     environment {
-        tfhome ="/var/lib/jenkins/tools/org.jenkinsci.plugins.terraform.TerraformInstallation/terraform_0.12.9/terraform"
-        }
+         tfhome="/var/lib/jenkins/tools/org.jenkinsci.plugins.terraform.TerraformInstallation/terraform_0.12.9"
+    }
     stages {
         stage('Pre Tests') {
              steps {
@@ -14,21 +14,26 @@ pipeline {
         stage('TF plan') {
              steps {
                 script {
-                  withEnv(["PATH=${env.tfHome}"]){
+                 wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
+                 withEnv(["PATH=${env.tfHome}:${env.PATH}"]) {
                     sh '''
-                        terraform init -input=false --backend-config=backend_config/dev.tfvars
-                        terraform plan -var-file=./env_vars/dev.tfvars -out=dev.plan -input=false
- 		    '''
- 		    }
+                            terraform init -input=false --backend-config=backend_config/dev.tfvars
+                            terraform plan -var-file=./env_vars/dev.tfvars -out=dev.plan -input=false
+                    '''
+ 		        }
+ 		        }
 		    }
 	    }
 	}			
         stage('TF apply') {
              steps {
                 script {
-                     withEnv(["PATH=${env.tfHome}"]) {
-                        sh 'terraform apply ./dev.plan'
-                       }
+                withEnv(["PATH=${env.tfHome}:${env.PATH}"]) {
+                    sh '''
+                    terraform apply ./dev.plan
+                    '''
+                    }
+
                 }
             }
         }
@@ -44,10 +49,13 @@ pipeline {
 	    stage('TF plan prod') {
              steps {
                 script {
+                withEnv(["PATH=${env.tfHome}:${env.PATH}"]) {
                     sh '''
-			terraform init -input=false --backend-config=backend_config/prod.tfvars
-		    	terraform plan -var-file=./env_vars/prod.tfvars -out=prod.plan -input=false
+                    rm -rf .terraform
+			        terraform init -input=false --backend-config=backend_config/prod.tfvars
+		    	    terraform plan -var-file=./env_vars/prod.tfvars -out=prod.plan -input=false
                     '''
+                   }
                 }
             }
         }
