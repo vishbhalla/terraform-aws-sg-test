@@ -1,8 +1,7 @@
 pipeline {
     agent any
-    environment{
-         alias terraform=/var/lib/jenkins/tools/org.jenkinsci.plugins.terraform.TerraformInstallation/terraform_0.12.9/terraform
-         export TF_IN_AUTOMATION=1
+    environment {
+         tfhome="/var/lib/jenkins/tools/org.jenkinsci.plugins.terraform.TerraformInstallation/terraform_0.12.9"
     }
     stages {
         stage('Pre Tests') {
@@ -15,19 +14,23 @@ pipeline {
         stage('TF plan') {
              steps {
                 script {
+                 withEnv(["PATH=${env.tfHome}:${env.PATH}"]) {
                 sh '''
                         terraform init -input=false --backend-config=backend_config/dev.tfvars
                         terraform plan -var-file=./env_vars/dev.tfvars -out=dev.plan -input=false
  		        '''
+ 		        }
 		    }
 	    }
 	}			
         stage('TF apply') {
              steps {
                 script {
+                withEnv(["PATH=${env.tfHome}:${env.PATH}"]) {
                     sh '''
                     terraform apply ./dev.plan
                     '''
+                    }
 
                 }
             }
