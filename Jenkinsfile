@@ -2,7 +2,7 @@ pipeline {
     agent any
     environment {
         alias terraform=/var/lib/jenkins/tools/org.jenkinsci.plugins.terraform.TerraformInstallation/terraform_0.12.9/terraform
-         export TF_IN_AUTOMATION=1
+        export TF_IN_AUTOMATION=1
         }
     stages {
         stage('Pre Tests') {
