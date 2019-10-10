@@ -47,10 +47,12 @@ pipeline {
 	    stage('TF plan prod') {
              steps {
                 script {
+                withEnv(["PATH=${env.tfHome}:${env.PATH}"]) {
                     sh '''
 			        terraform init -input=false --backend-config=backend_config/prod.tfvars
 		    	    terraform plan -var-file=./env_vars/prod.tfvars -out=prod.plan -input=false
                     '''
+                   }
                 }
             }
         }
