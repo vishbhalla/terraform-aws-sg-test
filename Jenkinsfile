@@ -1,33 +1,38 @@
 pipeline {
     agent any
+    environment {
+        tfhome ="/var/lib/jenkins/tools/org.jenkinsci.plugins.terraform.TerraformInstallation/terraform_0.12.9/terraform"
+        }
     stages {
         stage('Pre Tests') {
              steps {
                 script {
                     sh 'inspec exec test/pre -t aws://eu-west-1'
-		}
+		    }
 	    }
 	}
         stage('TF plan') {
              steps {
                 script {
+                  withEnv(["PATH=${env.tfHome}"]){
                     sh '''
-                        alias terraform=/var/lib/jenkins/tools/org.jenkinsci.plugins.terraform.TerraformInstallation/terraform_0.12.9/terraform
-                        export TF_IN_AUTOMATION=1
                         terraform init -input=false --backend-config=backend_config/dev.tfvars
                         terraform plan -var-file=./env_vars/dev.tfvars -out=dev.plan -input=false
  		    '''
-		}
+ 		    }
+		    }
 	    }
 	}			
         stage('TF apply') {
              steps {
                 script {
-                    sh 'terraform apply ./dev.plan -auto-approve'
+                     withEnv(["PATH=${env.tfHome}"]) {
+                        sh 'terraform apply ./dev.plan'
+                       }
                 }
             }
         }
-	stage('Post Tests') {
+	    stage('Post Tests') {
              steps {
                 script {
                     sh '''
@@ -36,7 +41,7 @@ pipeline {
                 }
             }
         }
-	stage('TF plan prod') {
+	    stage('TF plan prod') {
              steps {
                 script {
                     sh '''
