@@ -15,10 +15,12 @@ pipeline {
              steps {
                 script {
                  withEnv(["PATH=${env.tfHome}:${env.PATH}"]) {
-                sh '''
-                        terraform init -input=false --backend-config=backend_config/dev.tfvars
-                        terraform plan -var-file=./env_vars/dev.tfvars -out=dev.plan -input=false
- 		        '''
+                 wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
+                    sh '''
+                            terraform init -input=false --backend-config=backend_config/dev.tfvars
+                            terraform plan -var-file=./env_vars/dev.tfvars -out=dev.plan -input=false
+                    '''
+ 		        }
  		        }
 		    }
 	    }
