@@ -4,9 +4,7 @@ pipeline {
         stage('Pre Tests') {
              steps {
                 script {
-                    sh '''
-			inspec exec test/pre -t aws://eu-west-1
-		    '''
+                    sh 'inspec exec test/pre -t aws://eu-west-1'
 		}
 	    }
 	}
@@ -25,9 +23,7 @@ pipeline {
         stage('TF apply') {
              steps {
                 script {
-                    sh '''
-                        terraform apply ./tfplan.dev -auto-approve
-                    '''
+                    sh 'terraform apply ./tfplan.dev -auto-approve'
                 }
             }
         }
