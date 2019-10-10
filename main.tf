@@ -1,18 +1,14 @@
 terraform {
   required_version = ">= 0.12.9"
-  backend "s3" {
-    bucket = "410830981177-vish-tfstate"
-    region = "eu-west-1"
-    key    = "vish.tfstate"
-  }
+  backend "s3" {}
 }
 
 provider "aws" {
-  region = "eu-west-1"
+  region = "${var.region}"
 }
 
 resource "aws_security_group" "allow_tls" {
-  name        = "vish-sg-1"
+  name        = "${var.sg_name}"
   description = "Allow some inbound traffic"
 
   ingress {
@@ -23,6 +19,6 @@ resource "aws_security_group" "allow_tls" {
   }
 
   tags = {
-    Name = "Vish Testing"
+    Name = "${var.tag_name}"
   }
 }
