@@ -1,14 +1,12 @@
 terraform {
   required_version = ">= 0.12.9"
-  backend "s3" {
-    bucket = "410830981177-vish-tfstate"
-    region = "eu-west-1"
-    key    = "vish.tfstate"
-  }
+  backend "s3" {}
 }
 
+variable "region" {}
+
 provider "aws" {
-  region = "eu-west-1"
+  region = "${var.region}"
 }
 
 resource "aws_security_group" "allow_tls" {

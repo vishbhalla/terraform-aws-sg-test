@@ -16,7 +16,7 @@ pipeline {
                     sh '''
                         alias terraform=/var/lib/jenkins/tools/org.jenkinsci.plugins.terraform.TerraformInstallation/terraform_0.12.9/terraform
                         export TF_IN_AUTOMATION=1
-                        terraform init -input=false --backend-config=backends/dev-backend.conf
+                        terraform init -input=false --backend-config=backend_config/dev.tfvars
                         terraform plan -var-file=./env_vars/dev.tfvars -out=tfplan.dev -input=false
  		    '''
 		}
@@ -44,7 +44,7 @@ pipeline {
              steps {
                 script {
                     sh '''
-			terraform init -input=false --backend-config=backends/prod-backend.conf
+			terraform init -input=false --backend-config=backend_config/prod.tfvars
 		    	terraform plan -var-file=./env_vars/prod.tfvars -out=tfplan.dev -input=false
                     '''
                 }
