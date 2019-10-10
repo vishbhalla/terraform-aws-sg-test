@@ -1,16 +1,14 @@
 terraform {
-  required_version = ">= 0.12.9"
+//  required_version = ">= 0.12.9"
   backend "s3" {}
 }
-
-variable "region" {}
 
 provider "aws" {
   region = "${var.region}"
 }
 
 resource "aws_security_group" "allow_tls" {
-  name        = "vish-sg-1"
+  name        = "${var.sg_name}"
   description = "Allow some inbound traffic"
 
   ingress {
@@ -21,6 +19,6 @@ resource "aws_security_group" "allow_tls" {
   }
 
   tags = {
-    Name = "Vish Testing"
+    Name = "${var.tag_name}"
   }
 }
