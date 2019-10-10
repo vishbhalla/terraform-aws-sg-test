@@ -1,31 +1,54 @@
 pipeline {
     agent any
     stages {
-        stage('Production Plan') {
+        stage('Pre Tests') {
              steps {
                 script {
                     sh '''
-                        git merge production
+			inspec exec test/pre -t aws://eu-west-1
+		    '''
+		}
+	    }
+	}
+        stage('TF plan') {
+             steps {
+                script {
+                    sh '''
                         alias terraform=/var/lib/jenkins/tools/org.jenkinsci.plugins.terraform.TerraformInstallation/terraform_0.12.9/terraform
                         export TF_IN_AUTOMATION=1
-                        terraform init -input=false
-                        terraform plan -out=tfplan.prod.''' + currentBuild.toString() + ''' -input=false
-                        aws s3 cp ./tfplan.prod.''' + currentBuild.toString() + ''' s3://410830981177-vish-tfstate/prod-plans/
-                    '''
-                }
-            }
-        }
-        stage('Staging Plan') {
+                        terraform init -input=false --backend-config=backends/dev-backend.conf
+                        terraform plan -var-file=./env_vars/dev.tfvars -out=tfplan.dev -input=false
+ 		    '''
+		}
+	    }
+	}			
+        stage('TF apply') {
              steps {
                 script {
                     sh '''
-                        git merge staging
-                        terraform init -input=false
-                        terraform plan -out=tfplan.staging.''' + currentBuild.toString() + ''' -input=false
-                        aws s3 cp ./tfplan.staging.''' + currentBuild.toString() + ''' s3://410830981177-vish-tfstate/staging-plans/
+                        terraform apply ./tfplan.dev -auto-approve
                     '''
                 }
             }
         }
-	}
+	stage('Post Tests') {
+             steps {
+                script {
+                    sh '''
+                        inspec exec test/post -t aws://eu-west-1
+                    '''
+                }
+            }
+        }
+	stage('TF plan prod') {
+             steps {
+                script {
+                    sh '''
+			terraform init -input=false --backend-config=backends/prod-backend.conf
+		    	terraform plan -var-file=./env_vars/prod.tfvars -out=tfplan.dev -input=false
+                    '''
+                }
+            }
+        }
+    }
 }
