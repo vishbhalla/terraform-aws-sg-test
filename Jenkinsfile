@@ -1,8 +1,5 @@
 pipeline {
     agent any
-    environment {
-        tfhome ="/var/lib/jenkins/tools/org.jenkinsci.plugins.terraform.TerraformInstallation/terraform_0.12.9/terraform"
-        }
     stages {
         stage('Pre Tests') {
              steps {
@@ -14,21 +11,22 @@ pipeline {
         stage('TF plan') {
              steps {
                 script {
-                  withEnv(["PATH=${env.tfHome}"]){
-                    sh '''
+                        alias terraform=/var/lib/jenkins/tools/org.jenkinsci.plugins.terraform.TerraformInstallation/terraform_0.12.9/terraform
+                        export TF_IN_AUTOMATION=1
                         terraform init -input=false --backend-config=backend_config/dev.tfvars
                         terraform plan -var-file=./env_vars/dev.tfvars -out=dev.plan -input=false
  		    '''
- 		    }
 		    }
 	    }
 	}			
         stage('TF apply') {
              steps {
                 script {
-                     withEnv(["PATH=${env.tfHome}"]) {
-                        sh 'terraform apply ./dev.plan'
-                       }
+                    sh '''
+                    alias terraform=/var/lib/jenkins/tools/org.jenkinsci.plugins.terraform.TerraformInstallation/terraform_0.12.9/terraform
+                    export TF_IN_AUTOMATION=1
+                    terraform apply ./dev.plan'''
+
                 }
             }
         }
@@ -45,8 +43,10 @@ pipeline {
              steps {
                 script {
                     sh '''
-			terraform init -input=false --backend-config=backend_config/prod.tfvars
-		    	terraform plan -var-file=./env_vars/prod.tfvars -out=prod.plan -input=false
+                    alias terraform=/var/lib/jenkins/tools/org.jenkinsci.plugins.terraform.TerraformInstallation/terraform_0.12.9/terraform
+                    export TF_IN_AUTOMATION=1
+			        terraform init -input=false --backend-config=backend_config/prod.tfvars
+		    	    terraform plan -var-file=./env_vars/prod.tfvars -out=prod.plan -input=false
                     '''
                 }
             }
