@@ -1,33 +1,44 @@
+#!/usr/bin/env groovy
+
 pipeline {
     agent any
+    environment {
+        tfhome="/var/lib/jenkins/tools/org.jenkinsci.plugins.terraform.TerraformInstallation/terraform_0.12.9"
+    }
     stages {
         stage('Pre Tests') {
-             steps {
+            steps {
                 script {
                     sh 'inspec exec test/pre -t aws://eu-west-1'
-		}
+		        }
+	        }
 	    }
-	}
         stage('TF plan') {
-             steps {
+            steps {
                 script {
-                    sh '''
-                        alias terraform=/var/lib/jenkins/tools/org.jenkinsci.plugins.terraform.TerraformInstallation/terraform_0.12.9/terraform
-                        export TF_IN_AUTOMATION=1
-                        terraform init -input=false --backend-config=backend_config/dev.tfvars
-                        terraform plan -var-file=./env_vars/dev.tfvars -out=dev.plan -input=false
- 		    '''
-		}
-	    }
-	}			
+                    wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
+                        withEnv(["PATH=${env.tfHome}:${env.PATH}"]) {
+                            sh '''
+                                terraform init -input=false --backend-config=backend_config/dev.tfvars
+                                terraform plan -var-file=./env_vars/dev.tfvars -out=dev.plan -input=false
+                            '''
+ 		                }
+ 		            }
+		        }
+	        }
+        }		
         stage('TF apply') {
              steps {
                 script {
-                    sh 'terraform apply ./dev.plan -auto-approve'
+                    withEnv(["PATH=${env.tfHome}:${env.PATH}"]) {
+                        sh '''
+                            terraform apply ./dev.plan
+                        '''
+                    }
                 }
             }
         }
-	stage('Post Tests') {
+	    stage('Post Tests') {
              steps {
                 script {
                     sh '''
@@ -36,13 +47,16 @@ pipeline {
                 }
             }
         }
-	stage('TF plan prod') {
+	    stage('TF plan prod') {
              steps {
                 script {
-                    sh '''
-			terraform init -input=false --backend-config=backend_config/prod.tfvars
-		    	terraform plan -var-file=./env_vars/prod.tfvars -out=prod.plan -input=false
-                    '''
+                    withEnv(["PATH=${env.tfHome}:${env.PATH}"]) {
+                        sh '''
+                            rm -rf .terraform
+                            terraform init -input=false --backend-config=backend_config/prod.tfvars
+                            terraform plan -var-file=./env_vars/prod.tfvars -out=prod.plan -input=false
+                        '''
+                   }
                 }
             }
         }
