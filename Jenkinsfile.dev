@@ -12,7 +12,7 @@ pipeline {
         stage('Pre Tests') {
             steps {
                 script {
-                    sh 'inspec exec test/pre -t aws://eu-west-1'
+                    sh 'inspec exec test/dev/pre -t aws://eu-west-1'
                 }
             }
         }
@@ -43,7 +43,7 @@ pipeline {
             steps {
                 script {
                     sh '''
-                        inspec exec test/post -t aws://eu-west-1
+                        inspec exec test/dev/post -t aws://eu-west-1
                     '''
                 }
             }
