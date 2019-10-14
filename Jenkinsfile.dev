@@ -55,7 +55,7 @@ pipeline {
                         sh '''
                             rm -rf .terraform
                             terraform init -input=false --backend-config=backend_config/prod.tfvars
-                            echo "\n======================= Showing PROD Plan =======================\n"
+                            echo "\n======================= Showing PROD TF Plan to ensure it will work (fast fail feedback) =======================\n"
                             terraform plan -var-file=./env_vars/prod.tfvars -out=prod.plan -input=false
                             git diff origin/${ghprbTargetBranch}... --color
                         '''
