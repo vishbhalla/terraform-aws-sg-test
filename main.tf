@@ -7,7 +7,7 @@ provider "aws" {
   region = "${var.region}"
 }
 
-resource "aws_security_group" "allow_tls" {
+resource "aws_security_group" "sg" {
   name        = "${var.sg_name}"
   description = "Allow some inbound traffic"
 
