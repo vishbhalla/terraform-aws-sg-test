@@ -2,6 +2,9 @@
 
 pipeline {
     agent any
+    options {
+        ansiColor('xterm')
+    }
     environment {
         tfhome="/var/lib/jenkins/tools/org.jenkinsci.plugins.terraform.TerraformInstallation/terraform_0.12.9"
     }
@@ -10,25 +13,23 @@ pipeline {
             steps {
                 script {
                     sh 'inspec exec test/pre -t aws://eu-west-1'
-		        }
-	        }
-	    }
-        stage('TF plan') {
+                }
+            }
+        }
+        stage('TF plan dev') {
             steps {
                 script {
-                    wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
-                        withEnv(["PATH=${env.tfHome}:${env.PATH}"]) {
-                            sh '''
-                                terraform init -input=false --backend-config=backend_config/dev.tfvars
-                                terraform plan -var-file=./env_vars/dev.tfvars -out=dev.plan -input=false
-                            '''
- 		                }
- 		            }
-		        }
-	        }
+                    withEnv(["PATH=${env.tfHome}:${env.PATH}"]) {
+                        sh '''
+                            terraform init -input=false --backend-config=backend_config/dev.tfvars
+                            terraform plan -var-file=./env_vars/dev.tfvars -out=dev.plan -input=false
+                        '''
+                    }
+                }
+            }
         }		
         stage('TF apply') {
-             steps {
+            steps {
                 script {
                     withEnv(["PATH=${env.tfHome}:${env.PATH}"]) {
                         sh '''
@@ -38,8 +39,8 @@ pipeline {
                 }
             }
         }
-	    stage('Post Tests') {
-             steps {
+        stage('Post Tests') {
+            steps {
                 script {
                     sh '''
                         inspec exec test/post -t aws://eu-west-1
@@ -47,16 +48,18 @@ pipeline {
                 }
             }
         }
-	    stage('TF plan prod') {
-             steps {
+        stage('TF plan prod') {
+            steps {
                 script {
                     withEnv(["PATH=${env.tfHome}:${env.PATH}"]) {
                         sh '''
                             rm -rf .terraform
                             terraform init -input=false --backend-config=backend_config/prod.tfvars
+                            echo "\n======================= Showing PROD TF Plan to ensure it will work (fast fail feedback) =======================\n"
                             terraform plan -var-file=./env_vars/prod.tfvars -out=prod.plan -input=false
+                            git diff origin/${ghprbTargetBranch}... --color
                         '''
-                   }
+                    }
                 }
             }
         }
