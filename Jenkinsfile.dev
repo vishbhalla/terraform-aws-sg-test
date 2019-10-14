@@ -57,7 +57,7 @@ pipeline {
                             terraform init -input=false --backend-config=backend_config/prod.tfvars
                             echo "\n======================= Showing PROD Plan =======================\n"
                             terraform plan -var-file=./env_vars/prod.tfvars -out=prod.plan -input=false
-                            env
+                            echo ${ghprbTargetBranch}
                         '''
                     }
                 }
