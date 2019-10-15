@@ -2,7 +2,7 @@
 
 Master Branch
 |
- - feature-b
+ - feature-c
 
 ### InSpec Tests
    * in `test` folder
